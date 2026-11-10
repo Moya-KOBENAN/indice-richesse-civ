@@ -23,7 +23,7 @@ def select_assets(frame, weights, low, high):
     assets = frame.filter(like="asset_")
     if assets.empty:
         raise ValueError("Aucune variable d’actif disponible.")
-    if not assets.stack().isin([0., 1.]).all():
+    if not (assets.isin([0., 1.]) | assets.isna()).all().all():
         raise ValueError("Les actifs doivent être binaires ou manquants.")
     def prevalence_observed(col):
         valid = col.notna().to_numpy()

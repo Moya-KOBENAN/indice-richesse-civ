@@ -55,3 +55,12 @@ def test_dhs_target_uses_household_weights_when_they_differ():
     result = aggregate(frame, 1.)
     assert result.wealth_mean.iloc[0] == pytest.approx(3.)
     assert result.wealth_mean_unweighted.iloc[0] == pytest.approx(2.)
+
+
+def test_asset_prevalence_excludes_unknown_values_from_denominator():
+    import pandas as pd
+    from src.data.ehcvm.wealth_index import select_assets
+    frame = pd.DataFrame({'asset_01': [1., np.nan, 0.]})
+    selected = select_assets(frame, np.array([1., 100., 1.]), .1, .9)
+    assert list(selected.columns) == ['asset_01']
+    assert selected.asset_01.isna().sum() == 1

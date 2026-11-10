@@ -48,4 +48,6 @@ Les protections sont plus exigeantes, mais le travail ne peut être qualifié de
 
 L’importabilité des scripts ne garantit pas l’équivalence de tous leurs effets à l’exécution complète : le réentraînement CNN, les téléchargements Earth Engine et une nouvelle validation prédictive exhaustive n’ont pas été relancés. Les scripts historiques restent longs ; les classes de leurs DataLoader ne doivent pas être utilisées avec des workers multiples sans extraction au niveau du module. Voir l’audit d’architecture pour les limites de traçabilité.
 
-Bilan final local de cet audit : **65 tests sans données réussis**, **24 tests de qualité des données réussis** dans une exécution distincte ; contrôle de confidentialité et `git diff --check` réussis.
+Bilan final local de cet audit : **66 tests sans données réussis**, **24 tests de qualité des données réussis** dans une exécution distincte ; contrôle de confidentialité et `git diff --check` réussis.
+
+La première version de la branche d’audit a également réussi l’installation et les tests sur [GitHub Actions, macOS et Ubuntu](https://github.com/Moya-KOBENAN/indice-richesse-civ/actions/runs/42892451443). La correction complémentaire de prévalence avec valeurs manquantes a été testée localement avant intégration.
