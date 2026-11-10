@@ -19,7 +19,7 @@
 
 ## Limites de cette validation
 
-Aucun réentraînement, téléchargement, appel Earth Engine ou contrôle des données brutes n’a été exécuté. Les chiffres de performance et les conclusions empiriques ne sont pas certifiés par ces tests. L’installation depuis zéro avec le fichier de versions et le workflow GitHub Actions restent à vérifier sur une machine vierge. Plusieurs scripts historiques conservent des paramètres scientifiques en dur et des calculs au niveau du module ; l’exécution doit passer par les étapes explicites du pipeline.
+Aucun réentraînement, téléchargement, appel Earth Engine ou contrôle des données brutes n’a été exécuté. Les chiffres de performance et les conclusions empiriques ne sont pas certifiés par ces tests. À ce stade initial, l’installation depuis zéro restait à vérifier ; elle a ensuite été contrôlée pendant l’audit d’architecture décrit ci-dessous. Plusieurs scripts historiques conservent des paramètres scientifiques en dur et des calculs au niveau du module ; l’exécution doit passer par les étapes explicites du pipeline.
 
 La revue de confidentialité porte sur la copie préparée. Le dépôt d’origine contient des sorties dans son historique et ne doit pas servir de source à un push de cette version. La commande distante de lecture a renvoyé « Repository not found » ; elle ne permet pas de déterminer si le dépôt est inexistant ou privé et inaccessible.
 
@@ -44,10 +44,8 @@ Les protections sont plus exigeantes, mais le travail ne peut être qualifié de
 - Diagnostic de sensibilité ACP et audit des distances spatiales ajoutés au registre ; leurs résultats restent dans l’espace privé. Ces diagnostics ne sont pas des preuves de validité confirmatoire.
 - Contrôles locaux de cohérence des sources effectués sans publier leurs valeurs ; reproduction numérique de la référence ACP vérifiée localement. Les fichiers sources n’ont pas été modifiés.
 - Tests de qualité des données : 24 réussis sur les sources locales externes au dépôt.
-- Workflow de vérification configuré pour Ubuntu et macOS ; son résultat distant doit être distingué de l’exécution locale.
 
 L’importabilité des scripts ne garantit pas l’équivalence de tous leurs effets à l’exécution complète : le réentraînement CNN, les téléchargements Earth Engine et une nouvelle validation prédictive exhaustive n’ont pas été relancés. Les scripts historiques restent longs ; les classes de leurs DataLoader ne doivent pas être utilisées avec des workers multiples sans extraction au niveau du module. Voir l’audit d’architecture pour les limites de traçabilité.
 
 Bilan final local de cet audit : **66 tests sans données réussis**, **24 tests de qualité des données réussis** dans une exécution distincte ; contrôle de confidentialité et `git diff --check` réussis.
 
-La première version de la branche d’audit a également réussi l’installation et les tests sur [GitHub Actions, macOS et Ubuntu](https://github.com/Moya-KOBENAN/indice-richesse-civ/actions/runs/42892451443). La correction complémentaire de prévalence avec valeurs manquantes a été testée localement avant intégration.

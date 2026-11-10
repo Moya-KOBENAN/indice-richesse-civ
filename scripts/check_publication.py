@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FILES = {"README.md", ".gitignore", ".env.example", "pyproject.toml", "requirements.txt",
          "requirements-lock.txt", "environment.yml", "run_pipeline.py"}
 EXTENSIONS = {"src": {".py", ".js"}, "tests": {".py"}, "scripts": {".py"},
-              "docs": {".md"}, "config": {".yaml"}, ".github": {".yml"}}
+              "docs": {".md"}, "config": {".yaml"}}
 
 
 def allowed(name):

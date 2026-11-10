@@ -13,7 +13,7 @@ python -m pytest -m "not data" -q
 python run_pipeline.py --list
 ```
 
-Le fichier de versions provient d’un environnement pip propre testé sur macOS ARM64. Le workflow GitHub contrôle également Ubuntu ; les dépendances propres à la plateforme sont résolues par pip. Les poids ImageNet ne sont pas téléchargés par les tests sans données.
+Le fichier de versions provient d’un environnement pip propre testé sur macOS ARM64. Les dépendances propres à la plateforme sont résolues par pip. Les poids ImageNet ne sont pas téléchargés par les tests sans données.
 
 ## Garder les sources à l’extérieur du dépôt
 
