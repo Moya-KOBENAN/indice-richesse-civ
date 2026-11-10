@@ -51,7 +51,7 @@ python -m pytest tests/data_quality -q
 
 Les tests de qualité nécessitent les fichiers locaux. Le diagnostic `ehcvm/sensitivity` compare la référence ACP, les actifs seuls, le logement seul et deux seuils de regroupement des modalités rares ; il produit uniquement une table locale de sensibilité. Il ne remplace pas la validation des modèles prédictifs ni celle des choix de questionnaire.
 
-L’ordre détaillé et les dépendances sont dans le [guide de relecture](GUIDE_RELECTURE.md). Les étapes Earth Engine exigent un accès autorisé et une authentification ; les appels réseau se font uniquement lors de leur lancement explicite.
+L’ordre détaillé et les dépendances sont dans le [document méthodologique](METHODOLOGIE.md). Les étapes Earth Engine exigent un accès autorisé et une authentification ; les appels réseau se font uniquement lors de leur lancement explicite.
 
 ## Avant un envoi de code
 

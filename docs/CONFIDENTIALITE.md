@@ -1,9 +1,19 @@
-# Politique de diffusion
+# Données et confidentialité
 
-Cette copie a été constituée à partir d’une liste de fichiers de code et de configuration. L’ancien historique Git n’est pas repris : il contient des sorties d’analyse déjà suivies par Git.
+Le dépôt distribue le code, sa configuration publique, les tests et la documentation méthodologique. L’accès aux sources doit être obtenu séparément auprès de leurs producteurs, selon leurs conditions d’utilisation.
 
-Sont exclus : données brutes ou transformées, coordonnées, identifiants de ménages ou de grappes, caractéristiques individuelles, images d’enquête, prédictions, cartes, modèles entraînés, journaux, notebooks et rapports d’origine. Les exemples des tests sont construits dans le code.
+## Éléments exclus
 
-Le fichier `.gitignore` protège les ajouts ordinaires ; il ne supprime pas un fichier déjà suivi et peut être contourné par un ajout forcé. Le contrôle `python scripts/check_publication.py` vérifie aussi les chemins suivis et le contenu de l’index Git quand un dépôt existe. Il bloque certains motifs de coordonnées intégrées, de scores littéraux et de secrets reconnaissables, ainsi que les liens symboliques. Un contrôle automatique ne prouve pas à lui seul l’absence de toute information sensible dans le texte du code.
+Les microdonnées, identifiants, coordonnées, tables transformées, images extraites autour des grappes, caractéristiques individuelles, prédictions, cartes, modèles entraînés, journaux et documents de travail confidentiels ne sont pas distribués. Les exemples des tests sont synthétiques.
 
-Ne pas transférer l’ancien dossier `.git`, ne pas pousser l’ancien dépôt pour publier cette copie. Toute ouverture du dépôt ou ajout de résultats demande une revue des fichiers réellement transmis. Aucun droit de redistribution des sources n’est accordé ici.
+Les données et les sorties peuvent rester dans des dossiers externes via `RICHESSE_DATA_DIR` et `RICHESSE_OUTPUTS_DIR`. Les chemins privés et paramètres d’accès sont définis dans une configuration externe ; voir le [guide d’exécution](GUIDE_EXECUTION.md).
+
+## Contrôle de diffusion
+
+```sh
+python scripts/check_publication.py
+```
+
+Le contrôle vérifie les chemins autorisés, le contenu des fichiers de travail et de l’index Git, ainsi que certains motifs sensibles. Le fichier `.gitignore` exclut les données et sorties des ajouts ordinaires. Ces protections complètent la revue humaine des fichiers destinés à la diffusion ; elles ne constituent pas une preuve universelle d’absence d’information sensible.
+
+Le dépôt n’accorde aucun droit de redistribution des données sources.

@@ -30,7 +30,7 @@ python run_pipeline.py --list
 
 Les tests ne nécessitant pas les données vérifient des propriétés logicielles et statistiques sur des exemples construits. Ils ne reproduisent pas les performances empiriques.
 
-Le [guide d’exécution](docs/GUIDE_EXECUTION.md) décrit la configuration privée et les dossiers externes. L’[audit d’architecture](docs/ARCHITECTURE.md) expose les contrats et les limites du code.
+Le [guide d’exécution](docs/GUIDE_EXECUTION.md) décrit la configuration privée et les dossiers externes. La [documentation d’architecture](docs/ARCHITECTURE.md) expose les contrats et les limites du code.
 
 ## Exécution avec un accès autorisé
 
@@ -48,9 +48,13 @@ python run_pipeline.py --pipeline dhs --stage 01
 
 Le pipeline n’enchaîne pas automatiquement les étapes. Les sorties locales sont exclues intégralement de Git.
 
-## Parcours pour l’encadreur
+## Documentation
 
-Le [guide de relecture](docs/GUIDE_RELECTURE.md) relie les étapes aux scripts, explique les dépendances et liste les questions scientifiques restant à trancher. La note Word est transmise séparément.
+- [Méthodologie et parcours du code](docs/METHODOLOGIE.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Guide d’exécution](docs/GUIDE_EXECUTION.md)
+- [Qualité et tests](docs/QUALITE.md)
+- [Données et confidentialité](docs/CONFIDENTIALITE.md)
 
 ## Structure
 
@@ -75,6 +79,10 @@ Les conclusions dépendent du découpage spatial. Le gain d’un modèle doit ê
 
 Les cartes éventuelles sont expérimentales, sans interprétation causale ni statut de statistique officielle. Le contrôle de l’étendue des scores prédits ne constitue pas une détection complète des zones hors distribution.
 
-## Confidentialité et état de validation
+## Données et confidentialité
 
-Voir [la politique de diffusion](docs/CONFIDENTIALITE.md) et [le bilan de préparation](docs/VALIDATION.md). Aucun résultat numérique issu des données confidentielles n’est publié dans cette version. Toute diffusion ultérieure d’agrégats exige un examen spécifique.
+Les conditions de diffusion sont décrites dans la [politique de confidentialité](docs/CONFIDENTIALITE.md). Aucun résultat numérique issu des données confidentielles n’est publié dans cette version. Toute diffusion ultérieure d’agrégats exige un examen spécifique.
+
+## Auteur
+
+Moya KOBENAN.

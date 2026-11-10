@@ -1,10 +1,10 @@
 # Architecture et décisions de conception
 
-## Avis sur l’organisation
+## Organisation
 
-L’organisation par responsabilités est adaptée à un projet de recherche : elle sépare les sources d’enquête, l’extraction visuelle, les modèles, l’évaluation et la présentation. La séparation DHS/EHCVM conserve les spécificités des enquêtes, tandis que les étapes communes évitent de dupliquer la validation. Une réécriture en application web, une multiplication de services ou un découpage du pipeline par branches Git n’apporteraient rien à cet objectif.
+Le code est organisé par responsabilités : préparation des sources, extraction des caractéristiques, modélisation, évaluation et visualisation. Les sous-dossiers DHS et EHCVM portent les spécificités des enquêtes ; les étapes communes partagent le protocole de comparaison.
 
-Le registre `src/pipeline.py` décrit les étapes exécutables et les entrées attendues. La commande reste explicite ; ce registre n’est pas un moteur complet de dépendances et ne prouve pas que tous les prérequis scientifiques sont satisfaits.
+Le registre `src/pipeline.py` décrit les étapes exécutables et leurs entrées attendues. Chaque étape est lancée explicitement ; le registre ne réalise pas un enchaînement automatique des dépendances.
 
 ## Sens des dépendances
 
@@ -24,12 +24,12 @@ flowchart LR
     P --> E
 ```
 
-Les flèches indiquent les composants utilisés, pas les imports Python dans le sens inverse. `utils` ne dépend pas des étapes ; les modèles n’importent pas les points d’entrée d’évaluation. L’assemblage des matrices réside dans `src/features/design.py`. Les opérations numériques de l’indice sont dans `src/utils/wealth.py` ; les recodages EHCVM partagés sont dans `src/data/ehcvm/wealth_index.py`.
+Les flèches représentent les relations entre les composants. `utils` ne dépend pas des étapes ; les modèles n’importent pas les points d’entrée d’évaluation. L’assemblage des matrices réside dans `src/features/design.py`. Les opérations numériques de l’indice sont dans `src/utils/wealth.py` ; les recodages EHCVM partagés sont dans `src/data/ehcvm/wealth_index.py`.
 
 ## Contrats d’exécution
 
 - Chaque étape enregistrée expose `main()` et s’exécute uniquement sur appel explicite.
-- Les 18 scripts historiques ont leur corps placé dans `main()` ; l’équivalence de leur arbre syntaxique avant/après déplacement a été contrôlée. Leurs classes de jeux de données restent utilisées avec `num_workers=0` ; leur mise en parallèle nécessiterait d’extraire les classes au niveau du module.
+- Les étapes historiques encapsulent leur exécution dans `main()`. Leurs classes de jeux de données utilisent `num_workers=0` ; une mise en parallèle nécessite leur extraction au niveau du module.
 - Un test importe toutes les étapes avec interdiction d’écriture et de connexion réseau, après initialisation des bibliothèques tierces.
 - Les chemins locaux ne dépendent pas du répertoire de lancement.
 - La lecture des tables vérifie les clés requises, leur unicité et l’absence de clés manquantes.
@@ -43,7 +43,7 @@ La configuration scientifique publique est `config/config.yaml`. Un YAML externe
 
 Les données, sorties et fichiers Word sont exclus du dépôt. Le contrôle de publication refuse les chemins non autorisés et recherche certains contenus sensibles dans le dossier de travail et l’index Git. Il ne remplace pas une revue humaine.
 
-## Dette technique conservée explicitement
+## Limites techniques
 
 Les scripts historiques restent longs et contiennent des paramètres en dur. Leur isolation supprime les calculs à l’import ; elle ne constitue pas une refonte complète en petites fonctions testables. Les nouvelles comparaisons doivent utiliser le noyau partagé et les étapes communes. Les anciennes variantes restent utiles pour tracer les expériences, avec leur statut exploratoire.
 
