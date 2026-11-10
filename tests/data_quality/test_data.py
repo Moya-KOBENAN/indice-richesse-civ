@@ -1,3 +1,4 @@
+from src.utils.paths import DATA_DIR
 from pathlib import Path
 
 import pandas as pd
@@ -8,8 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # Base finale DHS + GPS + VIIRS
 DATA_FILE = (
-    PROJECT_ROOT
-    / "data"
+    DATA_DIR
     / "processed"
     / "dhs"
     / "DHS_CI_2021_richesse_GPS_VIIRS_merged.csv"

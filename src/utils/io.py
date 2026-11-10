@@ -17,8 +17,10 @@ def read_table(path, required=(), unique=None):
     missing = [column for column in required if column not in frame.columns]
     if missing:
         raise ValueError(f"{path.name} : colonnes manquantes {missing}")
-    if unique is not None and frame.duplicated(unique).any():
-        raise ValueError(f"{path.name} : clé {unique} non unique")
+    if unique is not None:
+        keys = [unique] if isinstance(unique, str) else list(unique)
+        if frame[keys].isna().any().any() or frame.duplicated(keys).any():
+            raise ValueError(f"{path.name} : clé {unique} manquante ou non unique")
     return frame
 
 

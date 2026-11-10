@@ -1,3 +1,4 @@
+from src.utils.paths import DATA_DIR
 from pathlib import Path
 
 import numpy as np
@@ -7,8 +8,7 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 CNN_FILE = (
-    PROJECT_ROOT
-    / "data"
+    DATA_DIR
     / "processed"
     / "dhs"
     / "cnn_features_resnet50.csv"
@@ -87,8 +87,7 @@ def test_clusters_correspondent_base_principale():
     features = load_features()
 
     main_file = (
-        PROJECT_ROOT
-        / "data"
+        DATA_DIR
         / "processed"
     / "dhs"
         / "DHS_CI_2021_richesse_GPS_VIIRS_merged.csv"

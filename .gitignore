@@ -27,3 +27,6 @@ __pycache__/
 *.joblib
 *.pkl
 *.ipynb
+
+# Configuration privée : utiliser un fichier externe au dépôt.
+/config/*.local.yaml

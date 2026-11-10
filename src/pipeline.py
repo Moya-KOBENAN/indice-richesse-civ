@@ -45,6 +45,7 @@ JEAN = "evaluation/common/replicate_jean_2016.py"
 
 PIPELINES = {
     "dhs": {
+        "spatial_audit": Stage("evaluation/common/audit_spatial_splits.py", "Distances apprentissage–test", (DHS_MAIN,), ("--survey", "dhs"), True),
         "01": Stage("data/dhs/01_prepare_dhs.py", "Indice de richesse par grappe (fichier HR)"),
         "02": Stage("data/dhs/02_prepare_gps.py", "GPS des grappes et fusion", (DHS_INTERIM_DIR / "dhs_clusters_wealth.csv",)),
         "03": Stage("data/dhs/03_merge_viirs.py", "Fusion richesse × VIIRS", (DHS_INTERIM_DIR / "DHS_CI_2021_clusters_richesse_GPS.csv", RAW_DIR / "DHS_CI_2021_VIIRS_clusters.csv")),
@@ -68,10 +69,12 @@ PIPELINES = {
         "jean": Stage(JEAN, "Réplication Jean et al. 2016 : placebo et plus pauvres", (DHS_MAIN,), ("--survey", "dhs"), True),
     },
     "ehcvm": {
+        "spatial_audit": Stage("evaluation/common/audit_spatial_splits.py", "Distances apprentissage–test", (EHCVM_MAIN,), ("--survey", "ehcvm"), True),
         "audit": Stage("data/ehcvm/audit_archive.py", "Audit de l'archive EHCVM 2021–2022", native_dry_run=True),
         "eda": Stage("exploration/ehcvm/eda.py", "Analyse exploratoire EHCVM", native_dry_run=True),
         "01": Stage("data/ehcvm/01_build_household_table.py", "Table ménage : welfare + logement + actifs + GPS"),
         "02": Stage("data/ehcvm/02_build_wealth_index.py", "Indice de richesse par ACP pondérée", (EHCVM_INTERIM_DIR / "ehcvm_households.csv",)),
+        "sensitivity": Stage("evaluation/ehcvm/wealth_sensitivity.py", "Sensibilité de l’ACP (résultats locaux)", (EHCVM_INTERIM_DIR / "ehcvm_households.csv",), native_dry_run=True),
         "03": Stage("data/ehcvm/03_aggregate_clusters.py", "Agrégation par grappe", (EHCVM_INTERIM_DIR / "ehcvm_households_wealth.csv",)),
         "04": Stage("data/ehcvm/04_extract_viirs.py", "VIIRS autour des grappes (Earth Engine)", (EHCVM_INTERIM_DIR / "ehcvm_clusters_wealth_gps.csv",), native_dry_run=True),
         "05": Stage("data/ehcvm/05_download_sentinel2.py", "Images Sentinel-2 des grappes (Earth Engine)", (EHCVM_MAIN,), native_dry_run=True),

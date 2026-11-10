@@ -27,7 +27,7 @@ if str(_ROOT) not in sys.path:
 import numpy as np
 import pandas as pd
 
-from src.evaluation.common.compare_feature_sets import load_design
+from src.features.design import load_design
 from src.utils.config import alpha_grid, load_config
 from src.utils.feature_sets import uses_residual
 from src.utils.io import write_table

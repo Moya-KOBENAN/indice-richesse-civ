@@ -47,3 +47,11 @@ def test_leakage_is_detected():
 def test_shuffled_group_folds_balanced():
     folds = shuffled_group_folds(np.arange(100).astype(str), 5, 0)
     assert [len(test) for _, test in folds] == [20] * 5
+
+
+def test_distance_diagnostic_detects_close_train_test_points():
+    from src.evaluation.common.audit_spatial_splits import distance_diagnostics
+    frame = pd.DataFrame({'latitude': [5., 5.001, 9.], 'longitude': [-4., -4., -4.]})
+    rows = distance_diagnostics(frame, [(np.array([0, 2]), np.array([1]))], 5.)
+    assert rows.nearest_train_min_km.iloc[0] < 1.
+    assert rows.share_below_image_side.iloc[0] == 1.

@@ -1,3 +1,4 @@
+from src.utils.paths import DATA_DIR
 from pathlib import Path
 
 import numpy as np
@@ -5,7 +6,7 @@ import rasterio
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SATELLITE_DIR = PROJECT_ROOT / "data" / "raw" / "satellite"
+SATELLITE_DIR = DATA_DIR / "raw" / "satellite"
 
 
 def get_images():

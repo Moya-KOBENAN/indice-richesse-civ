@@ -40,8 +40,6 @@ LABELS = {
 }
 SCHEMES = {"random": "Aléatoire", "blocks": "Blocs 100 km", "kmeans": "KMeans"}
 
-pd.set_option("display.width", 200)
-pd.set_option("display.max_columns", 20)
 
 
 def title(text):
@@ -131,10 +129,12 @@ def show_external():
     frame = read(COMPARISON_OUTPUTS_DIR / "cross_survey_metrics.csv")
     if frame is None:
         return
-    print(f"\n  {'Sens':16s}{'Jeu de variables':36s}{'Spearman':>10s}{'R²':>8s}")
+    print("  R² : accord après standardisation séparée, pas calibration sur l’échelle d’origine.")
+    metric = 'standardized_agreement_R2' if 'standardized_agreement_R2' in frame else 'R2'
+    print(f"\n  {'Sens':16s}{'Jeu de variables':36s}{'Spearman':>10s}{'R² std.':>8s}")
     for _, row in frame.sort_values(["train", "Spearman"], ascending=[True, False]).iterrows():
         print(f"  {row['train'].upper() + ' → ' + row['test'].upper():16s}"
-              f"{LABELS.get(row['feature_set'], row['feature_set']):36s}{row['Spearman']:10.3f}{row['R2']:8.3f}")
+              f"{LABELS.get(row['feature_set'], row['feature_set']):36s}{row['Spearman']:10.3f}{row[metric]:8.3f}")
 
 
 def show_articles():
@@ -167,7 +167,7 @@ def show_map():
         return
     print(f"  Modèle          : {frame['model'].iloc[0]} (alpha = {frame['alpha'].iloc[0]:.0f})")
     print(f"  Points          : {len(frame)} (grille de 10 km)")
-    print(f"  Hors domaine    : {int(frame['outside_training_range'].sum())}")
+    print(f"  Hors quantiles 1–99 % des scores d’apprentissage : {int(frame['outside_training_range'].sum())}")
     q = frame["wealth_predicted"].quantile([0, .25, .5, .75, 1]).round(2).tolist()
     print(f"  Richesse prédite: min {q[0]} | Q1 {q[1]} | médiane {q[2]} | Q3 {q[3]} | max {q[4]}")
     subtitle("Zones prédites les plus riches (5 premiers points)")
@@ -182,6 +182,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--section", choices=SECTIONS, nargs="+", default=list(SECTIONS))
     args = parser.parse_args(argv)
+    pd.set_option("display.width", 200)
+    pd.set_option("display.max_columns", 20)
     load_config()
     actions = {"donnees": show_data, "dhs": lambda: show_ablation("dhs"),
                "ehcvm": lambda: show_ablation("ehcvm"), "externe": show_external,

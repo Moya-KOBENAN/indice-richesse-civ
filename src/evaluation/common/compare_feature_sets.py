@@ -30,12 +30,13 @@ import numpy as np
 import pandas as pd
 
 from src.utils.config import alpha_grid, load_config
-from src.utils.feature_sets import VIIRS_VARIANTS, cnn_file, parse_feature_set, uses_residual
-from src.utils.io import read_table, write_table
+from src.utils.feature_sets import uses_residual
+from src.features.design import load_design, feature_columns
+from src.utils.io import write_table
 from src.utils.metrics import (bootstrap_ci, bootstrap_r2_difference, fold_dispersion,
                                regression_metrics, subgroup_metrics)
 from src.utils.modeling import baseline_predictions, nested_ridge_predictions
-from src.utils.paths import SURVEYS, survey_clusters_file, survey_dirs
+from src.utils.paths import SURVEYS, survey_dirs
 from src.utils.spatial import outer_splits
 
 DEFAULT_SETS = ["viirs", "viirs5", "cnn_imagenet", "cnn_imagenet_tiles", "cnn_national",
@@ -43,50 +44,6 @@ DEFAULT_SETS = ["viirs", "viirs5", "cnn_imagenet", "cnn_imagenet_tiles", "cnn_na
                 "cnn_national_tiles+viirs", "cnn_imagenet_tiles+viirs5"]
 BASELINES = ["reference_moyenne", "reference_milieu"]
 SCHEMES = ["random", "blocks", "kmeans"]
-
-
-def feature_columns(frame, path):
-    """Colonnes de caractéristiques : `cnn_*` (nouvelles étapes) ou `feature_*` (étape 13)."""
-    features = frame.filter(regex=r"^(cnn|feature)_\d+$")
-    if features.shape[1] == 0:
-        raise ValueError(f"{path.name} : aucune colonne de caractéristiques reconnue.")
-    return features
-
-
-def load_design(survey, feature_sets):
-    """Table des grappes + matrices X par jeu disponible, sur des grappes communes."""
-    base = read_table(survey_clusters_file(survey),
-                      required=["cluster", "wealth_mean", "latitude", "longitude", "urban_rural", *VIIRS_VARIANTS.values()],
-                      unique="cluster")
-    blocks, available = {}, []
-    for spec in feature_sets:
-        cnn_names, _ = parse_feature_set(spec)
-        paths = [cnn_file(survey, name) for name in cnn_names]
-        missing = [p.name for p in paths if not p.exists()]
-        if missing:
-            print(f"Jeu « {spec} » ignoré : fichiers absents {missing}")
-            continue
-        for name, path in zip(cnn_names, paths):
-            if name not in blocks:
-                frame = read_table(path, required=["cluster"], unique="cluster")
-                blocks[name] = feature_columns(frame.set_index("cluster"), path).add_prefix(f"{name}__")
-        available.append(spec)
-    clusters = set(base["cluster"])
-    for frame in blocks.values():
-        clusters &= set(frame.index)
-    dropped = len(base) - len(clusters)
-    if dropped:
-        print(f"{dropped} grappes sans toutes les caractéristiques : exclues pour une comparaison équitable.")
-    base = base[base["cluster"].isin(clusters)].sort_values("cluster").reset_index(drop=True)
-    matrices = {}
-    for spec in available:
-        cnn_names, viirs_column = parse_feature_set(spec)
-        parts = [blocks[n].loc[base["cluster"]].to_numpy() for n in cnn_names]
-        if viirs_column:
-            # VIIRS toujours en dernière colonne (attendu par ResidualRidge)
-            parts.append(np.log1p(base[[viirs_column]].clip(lower=0)).to_numpy())
-        matrices[spec] = np.hstack(parts)
-    return base, matrices
 
 
 def evaluate(base, matrices, scheme, config):

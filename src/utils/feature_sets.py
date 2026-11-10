@@ -42,6 +42,8 @@ def cnn_file(zone, name):
 def parse_feature_set(spec):
     """« cnn_imagenet+viirs » → (['cnn_imagenet'], 'viirs_2u5r_mean') ; sans VIIRS → None."""
     parts = spec.split("+")
+    if len(set(parts)) != len(parts):
+        raise ValueError(f"Variables répétées dans le jeu : {spec}")
     viirs = [p for p in parts if p in VIIRS_VARIANTS]
     if len(viirs) > 1:
         raise ValueError(f"Une seule variante VIIRS par jeu : {spec}")

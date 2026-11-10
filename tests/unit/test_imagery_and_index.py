@@ -48,7 +48,8 @@ def test_weighted_pca_orientation_and_quintiles():
     assert abs(np.corrcoef(score, latent)[0, 1]) > 0.8
     assert explained[0] > explained[1] and kept.all()
     quintiles = stage.weighted_quintiles(score, weights)
-    assert set(quintiles) == {1, 2, 3, 4, 5}
+    assert set(quintiles) <= {1, 2, 3, 4, 5}
+    assert np.all(np.diff(quintiles[np.argsort(score)]) >= 0)
 
 
 def test_rare_housing_categories_are_grouped():

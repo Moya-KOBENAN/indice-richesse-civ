@@ -18,11 +18,8 @@ KEYS = ["grappe", "menage", "vague"]
 
 
 def default_archive():
-    import yaml
-    with (CONFIG_DIR / "config.yaml").open() as handle:
-        config = yaml.safe_load(handle)
-    path = Path(config["ehcvm"]["archive"]).expanduser()
-    return path if path.is_absolute() else _ROOT / path
+    from src.utils.config import load_config, resolve_path
+    return resolve_path(load_config()["ehcvm"]["archive"])
 
 
 def csv_members(archive):

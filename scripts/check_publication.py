@@ -13,6 +13,8 @@ EXTENSIONS = {"src": {".py", ".js"}, "tests": {".py"}, "scripts": {".py"},
 
 def allowed(name):
     path = Path(name)
+    if name.startswith("config/") and name != "config/config.yaml":
+        return False
     return name in FILES or (len(path.parts) > 1 and
         path.suffix in EXTENSIONS.get(path.parts[0], set()) and
         not any(part.startswith(".") for part in path.parts[1:]))

@@ -4,12 +4,13 @@ Aucun script ne construit de chemin à partir du répertoire courant ; tout part
 de PROJECT_ROOT, ce qui rend les étapes exécutables depuis n'importe où.
 """
 from pathlib import Path
+import os
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 CONFIG_DIR = PROJECT_ROOT / "config"
 
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = Path(os.environ.get("RICHESSE_DATA_DIR", str(PROJECT_ROOT / "data"))).expanduser().resolve()
 RAW_DIR = DATA_DIR / "raw"
 INTERIM_DIR = DATA_DIR / "interim"
 PROCESSED_DIR = DATA_DIR / "processed"
@@ -23,7 +24,7 @@ EHCVM_PROCESSED_DIR = PROCESSED_DIR / "ehcvm"
 DHS_SATELLITE_DIR = RAW_DIR / "satellite"
 NATIONAL_SATELLITE_DIR = RAW_DIR / "satellite_national"
 
-OUTPUTS_DIR = PROJECT_ROOT / "outputs"
+OUTPUTS_DIR = Path(os.environ.get("RICHESSE_OUTPUTS_DIR", str(PROJECT_ROOT / "outputs"))).expanduser().resolve()
 
 COMMON_OUTPUTS_DIR = OUTPUTS_DIR / "common"
 COMMON_MODELS_DIR = COMMON_OUTPUTS_DIR / "models"

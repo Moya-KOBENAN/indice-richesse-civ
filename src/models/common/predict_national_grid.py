@@ -26,7 +26,7 @@ if str(_ROOT) not in sys.path:
 import numpy as np
 import pandas as pd
 
-from src.evaluation.common.compare_feature_sets import load_design
+from src.features.design import load_design, feature_columns
 from src.utils.config import alpha_grid, load_config
 from src.utils.feature_sets import cnn_file, parse_feature_set, uses_residual
 from src.utils.io import read_table, write_table
@@ -45,7 +45,7 @@ def grid_design(spec):
     for name in cnn_names:
         features = read_table(cnn_file("grid", name), required=["grid_id"], unique="grid_id")
         grid = grid.merge(features[["grid_id"]], on="grid_id", how="inner", validate="one_to_one")
-        parts.append(features.set_index("grid_id").filter(regex=r"^(cnn|feature)_\d+$"))
+        parts.append(feature_columns(features.set_index("grid_id"), cnn_file("grid", name)))
     if viirs_column and viirs_column not in grid.columns:
         raise ValueError(f"La grille n'a pas {viirs_column} : exécuter common/10d "
                          "ou choisir un jeu sans VIIRS dans prediction.feature_set.")
@@ -58,7 +58,6 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
-    ensure_layout("common")
     config = load_config()
     survey, spec = config["prediction"]["survey"], config["prediction"]["feature_set"]
     base, matrices = load_design(survey, [spec])
@@ -68,6 +67,7 @@ def main(argv=None):
     print(f"Apprentissage : {len(base)} grappes {survey} | grille : {len(grid)} points | jeu : {spec}")
     if args.dry_run:
         return
+    ensure_layout("common")
     import joblib
 
     groups = merge_colocated(regular_blocks(base["latitude"], base["longitude"],
@@ -77,7 +77,7 @@ def main(argv=None):
                                    config["validation"]["inner_folds"],
                                    residual=uses_residual(spec))
     grid["wealth_predicted"] = model.predict(X_grid)
-    # Hors du domaine d'apprentissage = extrapolation : à signaler sur la carte.
+    # Diagnostic de l’étendue des scores uniquement ; ce n’est pas un test hors distribution.
     low, high = base["wealth_mean"].quantile([0.01, 0.99])
     grid["outside_training_range"] = ~grid["wealth_predicted"].between(low, high)
     grid["model"] = f"ridge_{survey}_{spec}"

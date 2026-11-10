@@ -30,12 +30,14 @@ python run_pipeline.py --list
 
 Les tests ne nécessitant pas les données vérifient des propriétés logicielles et statistiques sur des exemples construits. Ils ne reproduisent pas les performances empiriques.
 
+Le [guide d’exécution](docs/GUIDE_EXECUTION.md) décrit la configuration privée et les dossiers externes. L’[audit d’architecture](docs/ARCHITECTURE.md) expose les contrats et les limites du code.
+
 ## Exécution avec un accès autorisé
 
 Les sources d’enquête doivent être obtenues auprès de leurs producteurs selon leurs conditions d’accès. Aucun accès n’est fourni par ce dépôt.
 
-1. Placer les sources dans `data/raw/`, exclu de Git.
-2. Adapter les chemins et le projet Earth Engine dans `config/config.yaml`.
+1. Conserver les sources dans un dossier privé externe, désigné par `RICHESSE_DATA_DIR`.
+2. Surcharger les chemins avec un YAML privé via `RICHESSE_CONFIG_FILE` et définir `EE_PROJECT_ID`.
 3. S’authentifier auprès de Google Earth Engine pour les étapes satellitaires.
 4. Consulter `python run_pipeline.py --list`, puis lancer chaque étape explicitement.
 
@@ -54,7 +56,7 @@ Le [guide de relecture](docs/GUIDE_RELECTURE.md) relie les étapes aux scripts, 
 
 ```text
 src/data/           préparation des enquêtes et de l’imagerie
-src/features/       extraction des caractéristiques visuelles
+src/features/       extraction et assemblage des matrices explicatives
 src/models/         apprentissage et prédiction
 src/evaluation/     validation spatiale, ablation et transfert
 src/exploration/    analyses descriptives locales

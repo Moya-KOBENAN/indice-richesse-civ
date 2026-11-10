@@ -33,7 +33,6 @@ from src.utils.paths import (
     ensure_layout,
 )
 
-ensure_layout('dhs')
 
 
 import re
@@ -405,6 +404,7 @@ def validate_output(df):
 # Programme principal
 # ---------------------------------------------------------------------
 def main():
+    ensure_layout("dhs")
 
     print("=" * 72)
     print(

@@ -6,8 +6,9 @@ Sortie  : data/interim/dhs/dhs_clusters_wealth.csv, une ligne par grappe.
 Cible : hv271, score factoriel de richesse calculé par le programme DHS
 (première composante d'une ACP sur les biens et le logement). On ne le
 recalcule pas : c'est l'indice officiel, comparable à la littérature.
-Moyenne simple et moyenne pondérée (hv005) sont conservées ; en DHS le poids
-est constant à l'intérieur d'une grappe, les deux coïncident (contrôlé ici).
+La cible wealth_mean est la moyenne pondérée par hv005. La moyenne simple
+et la moyenne pondérée explicite sont conservées pour le diagnostic. Leur
+égalité dépend des poids observés et n’est pas supposée a priori.
 """
 from pathlib import Path
 import sys
@@ -29,6 +30,12 @@ COLUMNS = ["hv001", "hv005", "hv270", "hv271"]
 
 def aggregate_clusters(households, divisor):
     """Moyennes par grappe du score de richesse et du quintile."""
+    from src.utils.wealth import positive_weights
+    if not np.isfinite(divisor) or divisor <= 0:
+        raise ValueError("Le diviseur du score doit être strictement positif.")
+    if households[COLUMNS].isna().any().any() or not np.isfinite(households[COLUMNS].to_numpy(float)).all():
+        raise ValueError("Variables DHS clés manquantes ou non finies.")
+    positive_weights(households["hv005"], len(households))
     households = households.assign(score=households["hv271"] / divisor,
                                    weight=households["hv005"] / 1e6)
     grouped = households.groupby("hv001")
@@ -40,6 +47,8 @@ def aggregate_clusters(households, divisor):
             lambda g: np.average(g["score"], weights=g["weight"]), include_groups=False),
         "wealth_sd": grouped["score"].std(),
     }).reset_index().rename(columns={"hv001": "cluster"})
+    clusters = clusters.rename(columns={"wealth_mean": "wealth_mean_unweighted"})
+    clusters["wealth_mean"] = clusters["wealth_mean_weighted"]
     return clusters
 
 
@@ -53,7 +62,7 @@ def main():
     clusters = aggregate_clusters(households, config["wealth_score_divisor"])
     if len(clusters) != config["expected_clusters"]:
         raise ValueError(f"{len(clusters)} grappes au lieu de {config['expected_clusters']}.")
-    gap = (clusters["wealth_mean"] - clusters["wealth_mean_weighted"]).abs().max()
+    gap = (clusters["wealth_mean_unweighted"] - clusters["wealth_mean_weighted"]).abs().max()
     print(f"Ménages : {len(households)} | grappes : {len(clusters)} | écart max simple/pondéré : {gap:.2e}")
     write_table(clusters, OUTPUT_FILE)
 

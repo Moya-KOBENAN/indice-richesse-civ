@@ -33,3 +33,19 @@ La revue de confidentialité porte sur la copie préparée. Le dépôt d’origi
 - Guide de relecture ajouté pour l’encadreur ; les limites nécessitant des données sont explicites.
 
 Les protections sont plus exigeantes, mais le travail ne peut être qualifié de scientifiquement irréprochable sur cette seule base. Les points ouverts du guide doivent être traités avant de figer les conclusions empiriques.
+
+## Audit d’architecture et installation propre
+
+- Installation réellement exécutée dans un nouvel environnement Python 3.12 : l’ancien gel Conda échouait sur `torch==2.5.1.post7`. Il a été remplacé par un gel pip vérifié, sans dépendances macOS inutiles ; `pip check` réussit.
+- Toutes les étapes exposent `main()` ; les corps des 18 scripts historiques ont été déplacés sans modification de leur AST. Le test d’import interdit écritures et connexions réseau après initialisation des bibliothèques tierces.
+- Assemblage des matrices extrait dans `src/features/design.py` ; suppression de la dépendance des modèles envers les points d’entrée d’évaluation. Tri numérique des colonnes de caractéristiques et contrôles des cibles, coordonnées et modalités.
+- Configuration privée externe et racines de données/sorties externes prises en charge ; l’audit de l’archive utilise désormais la même configuration que les autres étapes.
+- Cible DHS explicitement pondérée ; moyenne simple conservée. L’ACP refuse les poids invalides et les matrices constantes ou non finies ; les valeurs manquantes des actifs ne sont plus assimilées à une absence pour calculer leur prévalence. Les quintiles préservent les ex æquo.
+- Diagnostic de sensibilité ACP et audit des distances spatiales ajoutés au registre ; leurs résultats restent dans l’espace privé. Ces diagnostics ne sont pas des preuves de validité confirmatoire.
+- Contrôles locaux de cohérence des sources effectués sans publier leurs valeurs ; reproduction numérique de la référence ACP vérifiée localement. Les fichiers sources n’ont pas été modifiés.
+- Tests de qualité des données : 24 réussis sur les sources locales externes au dépôt.
+- Workflow de vérification configuré pour Ubuntu et macOS ; son résultat distant doit être distingué de l’exécution locale.
+
+L’importabilité des scripts ne garantit pas l’équivalence de tous leurs effets à l’exécution complète : le réentraînement CNN, les téléchargements Earth Engine et une nouvelle validation prédictive exhaustive n’ont pas été relancés. Les scripts historiques restent longs ; les classes de leurs DataLoader ne doivent pas être utilisées avec des workers multiples sans extraction au niveau du module. Voir l’audit d’architecture pour les limites de traçabilité.
+
+Bilan final local de cet audit : **65 tests sans données réussis**, **24 tests de qualité des données réussis** dans une exécution distincte ; contrôle de confidentialité et `git diff --check` réussis.

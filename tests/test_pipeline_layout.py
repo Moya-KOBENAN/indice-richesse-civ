@@ -59,7 +59,9 @@ def test_canonical_scripts_use_scoped_paths():
             tree = ast.parse(stage.path.read_text())
             environment = {name: value for name, value in vars(project_paths).items() if isinstance(value, Path)}
             paths = []
-            for node in tree.body:
+            main_body = next((n.body for n in tree.body
+                              if isinstance(n, ast.FunctionDef) and n.name == "main"), [])
+            for node in [*tree.body, *main_body]:
                 if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
                     try:
                         value = resolve_path(node.value, environment)
@@ -104,13 +106,13 @@ def test_cli_from_another_directory(tmp_path, args, expected):
     assert not list(tmp_path.iterdir())
 
 
-def test_every_stage_script_defines_entry_point_or_is_historical():
-    """Les nouvelles étapes suivent la convention main() + garde __main__."""
+def test_every_stage_script_defines_entry_point():
+    """Toutes les étapes suivent main() + garde __main__."""
     for stages in PIPELINES.values():
         for stage in stages.values():
             text = stage.path.read_text()
-            if "def main(" in text:
-                assert 'if __name__ == "__main__"' in text or "if __name__=='__main__'" in text, stage.script
+            assert "def main(" in text, stage.script
+            assert 'if __name__ == "__main__"' in text or "if __name__=='__main__'" in text, stage.script
 
 
 def test_config_is_valid():

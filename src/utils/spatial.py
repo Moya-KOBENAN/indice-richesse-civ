@@ -12,6 +12,10 @@ def to_local_km(latitude, longitude):
     """Projection équirectangulaire locale, suffisante à l'échelle d'un pays."""
     latitude = np.asarray(latitude, dtype=float)
     longitude = np.asarray(longitude, dtype=float)
+    if (latitude.ndim != 1 or latitude.shape != longitude.shape or not len(latitude)
+            or not np.isfinite(latitude).all() or not np.isfinite(longitude).all()
+            or np.any(np.abs(latitude) > 90) or np.any(np.abs(longitude) > 180)):
+        raise ValueError("Coordonnées invalides ou non alignées.")
     x_km = longitude * 111.32 * np.cos(np.radians(latitude.mean()))
     y_km = latitude * 110.57
     return x_km - x_km.min(), y_km - y_km.min()
@@ -19,6 +23,8 @@ def to_local_km(latitude, longitude):
 
 def regular_blocks(latitude, longitude, block_size_km):
     """Identifiant de bloc carré de `block_size_km` pour chaque point."""
+    if not np.isfinite(block_size_km) or block_size_km <= 0:
+        raise ValueError("La taille des blocs doit être positive et finie.")
     x_km, y_km = to_local_km(latitude, longitude)
     bx = np.floor(x_km / block_size_km).astype(int)
     by = np.floor(y_km / block_size_km).astype(int)

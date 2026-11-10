@@ -22,6 +22,7 @@ import pandas as pd
 from src.utils.config import load_config
 from src.utils.io import read_table, write_table
 from src.utils.paths import EHCVM_INTERIM_DIR, ensure_layout
+from src.utils.wealth import positive_weights
 
 INPUT_FILE = EHCVM_INTERIM_DIR / "ehcvm_households_wealth.csv"
 OUTPUT_FILE = EHCVM_INTERIM_DIR / "ehcvm_clusters_wealth_gps.csv"
@@ -29,7 +30,18 @@ CONSTANT_WITHIN_CLUSTER = ["vague", "milieu", "region", "latitude", "longitude"]
 
 
 def aggregate(households, urban_code):
-    varying = households.groupby("grappe")[CONSTANT_WITHIN_CLUSTER].nunique().gt(1).any()
+    required = ["grappe", "wealth_score", "hhweight", "wealth_quintile", "pcexp", *CONSTANT_WITHIN_CLUSTER]
+    if households[required].isna().any().any():
+        raise ValueError("Valeur requise manquante pour l’agrégation.")
+    positive_weights(households.hhweight, len(households))
+    numeric = households[["wealth_score", "pcexp", "latitude", "longitude"]].to_numpy(float)
+    if not np.isfinite(numeric).all() or (households.pcexp <= 0).any():
+        raise ValueError("Score, coordonnées ou consommation invalides.")
+    if not households.latitude.between(-90, 90).all() or not households.longitude.between(-180, 180).all():
+        raise ValueError("Coordonnées hors limites.")
+    if not households.milieu.isin([1, 2]).all():
+        raise ValueError("Modalité de milieu inconnue.")
+    varying = households.groupby("grappe")[CONSTANT_WITHIN_CLUSTER].nunique(dropna=False).gt(1).any()
     if varying.any():
         raise ValueError(f"Variables non constantes dans une grappe : {varying[varying].index.tolist()}")
     grouped = households.groupby("grappe")
@@ -51,10 +63,10 @@ def aggregate(households, urban_code):
 def main():
     ensure_layout("ehcvm")
     config = load_config()["ehcvm"]
-    households = read_table(INPUT_FILE, required=["grappe", "wealth_score", "hhweight"] + CONSTANT_WITHIN_CLUSTER)
+    households = read_table(INPUT_FILE, required=["grappe", "wealth_score", "hhweight", "wealth_quintile", "pcexp"] + CONSTANT_WITHIN_CLUSTER)
     clusters = aggregate(households, config["urban_code"])
     if len(clusters) != config["expected_clusters"]:
-        print(f"ATTENTION : {len(clusters)} grappes au lieu de {config['expected_clusters']}.")
+        raise ValueError(f"{len(clusters)} grappes au lieu de {config['expected_clusters']}.")
     print(clusters[["n_households", "wealth_mean"]].describe().to_string())
     print(f"Grappes partageant une position : {int(clusters['shares_position'].sum())}")
     write_table(clusters, OUTPUT_FILE)
