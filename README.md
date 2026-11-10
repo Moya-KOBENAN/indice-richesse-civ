@@ -46,6 +46,10 @@ python run_pipeline.py --pipeline dhs --stage 01
 
 Le pipeline n’enchaîne pas automatiquement les étapes. Les sorties locales sont exclues intégralement de Git.
 
+## Parcours pour l’encadreur
+
+Le [guide de relecture](docs/GUIDE_RELECTURE.md) relie les étapes aux scripts, explique les dépendances et liste les questions scientifiques restant à trancher. La note Word est transmise séparément.
+
 ## Structure
 
 ```text

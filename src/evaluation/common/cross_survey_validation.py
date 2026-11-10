@@ -1,8 +1,8 @@
 """Validation externe entre enquêtes : DHS → EHCVM et EHCVM → DHS.
 
 Un modèle entraîné sur une enquête est appliqué aux grappes de l'autre,
-jamais vues et tirées indépendamment. C'est le test le plus exigeant de
-généralisation. Les deux indices n'ayant pas la même échelle (hv271 DHS
+non utilisées pour l'ajustement. La proximité géographique entre enquêtes
+n'est pas exclue : cette évaluation ne démontre pas une extrapolation spatiale. Les deux indices n'ayant pas la même échelle (hv271 DHS
 contre ACP EHCVM), cible et prédiction sont centrées-réduites dans chaque
 enquête ; on rapporte surtout la corrélation de rang (Spearman), invariante
 à l'échelle.
@@ -17,6 +17,7 @@ _ROOT = Path(__file__).resolve().parents[3]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+import numpy as np
 import pandas as pd
 
 from src.evaluation.common.compare_feature_sets import load_design
@@ -32,7 +33,13 @@ OUTPUT_FILE = COMPARISON_OUTPUTS_DIR / "cross_survey_metrics.csv"
 
 
 def zscore(values):
-    return (values - values.mean()) / values.std()
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 1 or not len(values) or not np.isfinite(values).all():
+        raise ValueError("Standardisation impossible : valeurs non finies ou variance nulle.")
+    scale = values.std(ddof=0)
+    if not np.isfinite(scale) or scale <= 0:
+        raise ValueError("Standardisation impossible : valeurs non finies ou variance nulle.")
+    return (values - values.mean()) / scale
 
 
 def main(argv=None):
@@ -48,13 +55,15 @@ def main(argv=None):
         groups = merge_colocated(
             regular_blocks(base_train["latitude"], base_train["longitude"], config["validation"]["block_size_km"]),
             base_train["latitude"], base_train["longitude"])
-        for spec in set(X_train) & set(X_test):
+        for spec in sorted(set(X_train) & set(X_test)):
             model, alpha = fit_final_ridge(X_train[spec], zscore(base_train["wealth_mean"]), groups,
                                            alpha_grid(), config["validation"]["inner_folds"],
                                    residual=uses_residual(spec))
             prediction = model.predict(X_test[spec])
             rows.append({"train": train, "test": test, "feature_set": spec, "alpha": alpha,
-                         **regression_metrics(zscore(base_test["wealth_mean"]), zscore(pd.Series(prediction)))})
+                         **{("standardized_agreement_" + key if key in {"R2", "RMSE", "MAE"} else key): value
+                            for key, value in regression_metrics(zscore(base_test["wealth_mean"]),
+                                                                 zscore(prediction)).items()}})
             print(f"{train} → {test} | {spec:26s} Spearman = {rows[-1]['Spearman']:.3f}")
     write_table(pd.DataFrame(rows), OUTPUT_FILE)
 

@@ -32,8 +32,9 @@ def fold_dispersion(y_true, y_pred, folds):
 def _group_bootstrap_indices(groups, n_iterations, random_state):
     """Tirages avec remise des groupes spatiaux (pas des grappes isolées).
 
-    Rééchantillonner les groupes respecte l'autocorrélation spatiale ; tirer
-    les grappes une à une donnerait des intervalles trop étroits.
+    Le calcul conserve les dépendances internes aux groupes ; il suppose
+    une indépendance suffisante entre groupes et ne réentraîne pas les modèles.
+    Il ne couvre donc pas toute l’incertitude liée à l’apprentissage.
     """
     groups = np.asarray(groups)
     members = {g: np.flatnonzero(groups == g) for g in np.unique(groups)}

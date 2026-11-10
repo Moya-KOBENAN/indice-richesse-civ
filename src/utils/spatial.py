@@ -76,6 +76,8 @@ def outer_splits(scheme, frame, config):
 def shuffled_group_folds(groups, n_splits, random_state):
     """Plis aléatoires au niveau des groupes (équivalent d'un KFold mélangé)."""
     groups = np.asarray(groups)
+    if not 2 <= n_splits <= len(np.unique(groups)):
+        raise ValueError("Le nombre de plis doit être compris entre 2 et le nombre de groupes.")
     unique = np.random.default_rng(random_state).permutation(np.unique(groups))
     fold_of = {group: position % n_splits for position, group in enumerate(unique)}
     folds = np.array([fold_of[group] for group in groups])
@@ -85,11 +87,20 @@ def shuffled_group_folds(groups, n_splits, random_state):
 def assert_disjoint(splits, groups):
     """Aucun groupe ne doit apparaître à la fois en apprentissage et en test."""
     groups = np.asarray(groups)
-    covered = np.zeros(len(groups), dtype=bool)
+    if groups.ndim != 1 or not len(groups):
+        raise ValueError("Les groupes doivent être un vecteur non vide.")
+    covered = np.zeros(len(groups), dtype=int)
     for fold, (train, test) in enumerate(splits, start=1):
+        train, test = np.asarray(train), np.asarray(test)
+        for indices in (train, test):
+            if (indices.ndim != 1 or not len(indices)
+                    or not np.issubdtype(indices.dtype, np.integer)
+                    or np.any(indices < 0) or np.any(indices >= len(groups))
+                    or len(np.unique(indices)) != len(indices)):
+                raise ValueError(f"Indices invalides au pli {fold}.")
         shared = set(groups[train]) & set(groups[test])
         if shared:
             raise ValueError(f"Fuite spatiale au pli {fold} : {sorted(shared)[:5]}")
-        covered[test] = True
-    if not covered.all():
-        raise ValueError("Certaines grappes ne sont dans aucun pli de test.")
+        covered[test] += 1
+    if not np.all(covered == 1):
+        raise ValueError("Chaque grappe doit apparaître exactement une fois en test.")

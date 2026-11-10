@@ -12,7 +12,7 @@ Protocole (identique pour toutes les lignes du tableau) :
   porte sur le résidu (sinon VIIRS est écrasée parmi 2 048 variables) ;
 - références naïves : moyenne globale et moyenne urbain/rural ;
 - incertitude : écart-type entre plis, IC bootstrap par groupes spatiaux,
-  gain apparié par rapport à VIIRS avec règle de décision fixée à l'avance
+  gain apparié par rapport à VIIRS avec règle de décision consignée
   (config.yaml : validation.min_r2_gain).
 
 Sorties (outputs/<enquête>/tables/) : ablation_metrics.csv,

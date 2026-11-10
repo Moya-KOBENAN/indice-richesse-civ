@@ -14,6 +14,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, Ridge
 
+from src.utils.spatial import assert_disjoint
+
 
 def ridge_pipeline():
     return Pipeline([
@@ -29,8 +31,8 @@ class ResidualRidge(BaseEstimator, RegressorMixin):
     Concaténer une variable très informative (VIIRS) à 2 048 caractéristiques
     CNN sous une même pénalité l'écrase : avec alpha ≈ 10³, son coefficient
     est rétréci comme les autres. Ici VIIRS n'est pas pénalisée et le CNN
-    n'explique que ce que VIIRS n'explique pas : c'est exactement le test de
-    H2 (« le CNN apporte-t-il une information au-delà de VIIRS ? »).
+    n'explique que ce que VIIRS n'explique pas : cette variante évalue une stratégie séquentielle particulière.
+    Elle ne remplace pas toutes les formes de régression conjointe CNN + VIIRS.
     """
 
     def __init__(self, alpha=1.0):
@@ -68,6 +70,12 @@ def nested_ridge_predictions(X, y, splits, groups, alphas, inner_folds=5, residu
     X = np.asarray(X, dtype=float)
     y = np.asarray(y, dtype=float)
     groups = np.asarray(groups)
+    splits = list(splits)
+    if X.ndim != 2 or y.ndim != 1 or len(X) != len(y) or len(groups) != len(y):
+        raise ValueError("Dimensions incompatibles entre X, y et groupes.")
+    if not np.isfinite(y).all():
+        raise ValueError("La cible doit être finie.")
+    assert_disjoint(splits, groups)
     predictions = np.full(len(y), np.nan)
     folds = np.full(len(y), -1)
     chosen = []
