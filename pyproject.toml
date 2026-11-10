@@ -1,0 +1,13 @@
+[project]
+name = "indice-richesse-cote-ivoire"
+version = "0.2.0"
+description = "Estimation spatiale d'un indice de richesse des ménages en Côte d'Ivoire (DHS, EHCVM, Sentinel-2, VIIRS)"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+# La racine du projet est importable (`import src...`) quel que soit le répertoire courant.
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "data: contrôle qui lit les données locales du projet (lent, nécessite data/)",
+]

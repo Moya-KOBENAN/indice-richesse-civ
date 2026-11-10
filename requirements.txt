@@ -1,0 +1,15 @@
+numpy
+pandas
+geopandas
+matplotlib
+scikit-learn
+rasterio
+pyproj
+shapely
+Pillow
+torch
+torchvision
+earthengine-api
+requests
+PyYAML
+pytest

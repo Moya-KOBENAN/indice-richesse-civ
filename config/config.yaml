@@ -1,0 +1,130 @@
+# =====================================================================
+# Configuration unique du projet.
+# Règle : tout paramètre scientifique ou chemin externe se modifie ici,
+# jamais dans le code. Les chemins relatifs partent de la racine du projet.
+# Les étapes historiques DHS (03 à 13) gardent encore certains paramètres
+# en dur : voir docs/ETAPES_RESTANTES.md, section « Dette technique ».
+# =====================================================================
+
+project:
+  name: "indice_richesse_cote_ivoire"
+  country: "Cote d'Ivoire"
+  year: 2021
+  random_state: 42
+
+earth_engine:
+  project_id: "YOUR_EARTH_ENGINE_PROJECT"
+
+# ---------------------------------------------------------------------
+# Sources brutes externes (lecture seule, jamais modifiées)
+# ---------------------------------------------------------------------
+dhs:
+  # Dossier contenant CIHR81DT/ et CIGE81FL/ (téléchargement DHS Program)
+  raw_dir: "data/raw/dhs"
+  household_file: "CIHR81DT/CIHR81FL.DTA"
+  gps_file: "CIGE81FL/CIGE81FL.shp"
+  # hv271 est stocké avec 5 décimales implicites dans les fichiers DHS
+  wealth_score_divisor: 100000
+  expected_clusters: 539
+
+ehcvm:
+  archive: "data/raw/CIV_2021_EHCVM-2_v01_M_CSV.zip"
+  encoding: "cp1252"
+  # Codes de milieu du fichier welfare (1 = urbain, 2 = rural)
+  urban_code: 1
+  expected_clusters: 1081
+  wealth_index:
+    housing_variables: ["s11q01", "s11q18", "s11q19", "s11q20", "s11q21",
+                        "s11q26a", "s11q33", "s11q37", "s11q54"]
+    # Une modalité de logement plus rare que ce seuil (part pondérée)
+    # est regroupée dans « autre » pour éviter des axes ACP instables.
+    min_category_share: 0.01
+    # Un bien possédé par moins de 1 % ou plus de 99 % des ménages
+    # n'apporte presque aucune information discriminante.
+    min_asset_prevalence: 0.01
+    max_asset_prevalence: 0.99
+  satellite:
+    # Couvre les deux vagues (fin 2021 et mi-2022)
+    start_date: "2021-09-01"
+    end_date: "2022-09-01"
+  viirs:
+    collection: "NOAA/VIIRS/DNB/ANNUAL_V21"
+    year: 2021
+
+# ---------------------------------------------------------------------
+# Imagerie et variables satellitaires
+# ---------------------------------------------------------------------
+data:
+  expected_clusters: 539
+  target: "wealth_mean"
+
+satellite:
+  collection: "COPERNICUS/S2_SR_HARMONIZED"
+  start_date: "2021-01-01"
+  end_date: "2022-01-01"
+  bands: ["B4", "B3", "B2"]
+  patch_radius_m: 2500
+  patch_size_km: 5
+  scale_m: 10
+  cloud_threshold: 40
+  fallback_cloud_threshold: 80
+  minimum_images: 3
+  minimum_nonzero_ratio: 0.90
+  # Même normalisation pour toutes les images (préserve les écarts de luminosité)
+  max_reflectance: 0.30
+
+viirs:
+  preferred_variable: "viirs_2u5r_mean"
+  transformation: "log1p"
+  scale_m: 500
+  urban_radius_m: 2000
+  rural_radius_m: 5000
+  rural_radius_sensitivity_m: 10000
+  all_radius_m: 5000
+
+features:
+  cnn_backbone: "resnet50"
+  batch_size: 16
+  # Découpage en tuiles de ~1 km (100 px à 10 m) puis moyenne,
+  # comme Xie et al. (2016) ; 0 = image entière.
+  tile_size_px: 100
+
+# ---------------------------------------------------------------------
+# Modélisation et évaluation
+# ---------------------------------------------------------------------
+model:
+  baseline: "VIIRS"
+  cnn_feature_model: "resnet50_imagenet"
+  regression_model: "Ridge"
+  alphas:
+    log10_min: -3
+    log10_max: 5
+    n: 25
+
+validation:
+  preliminary_cv: "KFold"
+  n_splits: 10
+  final_validation: "spatial"
+  n_spatial_folds: 5
+  inner_folds: 5
+  block_size_km: 100
+  kmeans_groups: 10
+  bootstrap_iterations: 1000
+  # Test placebo de Jean et al. (2016) : images permutées entre grappes
+  placebo_trials: 100
+  # Règle de décision consignée ; antériorité aux résultats non vérifiée :
+  # un jeu de variables n'est « meilleur » que si son gain de R² spatial
+  # dépasse cette valeur ET que l'intervalle bootstrap du gain exclut 0.
+  min_r2_gain: 0.02
+
+prediction:
+  # Jeu de variables utilisé pour la carte nationale (doit exister
+  # à la fois pour les grappes d'enquête et pour la grille nationale).
+  feature_set: "cnn_imagenet_tiles+viirs5"
+  survey: "dhs"
+
+paths:
+  raw: "data/raw"
+  processed: "data/processed"
+  satellite: "data/raw/satellite"
+  outputs: "outputs"

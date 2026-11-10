@@ -1,0 +1,27 @@
+name: richesse
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.12
+  - pandas
+  - numpy
+  - geopandas
+  - matplotlib
+  - scikit-learn
+  - pyarrow
+  - openpyxl
+  - pyyaml
+  - pytest
+  - rasterio
+  - earthengine-api
+  - geemap
+  - requests
+  - pyproj
+  - shapely
+  - pillow
+  - pip
+  - pip:
+      - torch
+      - torchvision
